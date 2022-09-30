@@ -8,7 +8,7 @@ Route::group(
     [
         'middleware' => ['auth'],
         'as' => 'dashboard.',
-        'prefix' => 'dashboard'
+       'prefix' => 'dashboard'
 
     ],
     function () {

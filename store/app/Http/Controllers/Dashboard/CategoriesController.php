@@ -7,6 +7,7 @@ use App\Models\Category;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CategoriesController extends Controller
@@ -31,7 +32,8 @@ class CategoriesController extends Controller
     {
 
         $parents = Category::all();
-        return view('dashboard.categories.create', compact('parents'));
+        $category = new Category();
+        return view('dashboard.categories.create', compact('parents', 'category'));
     }
 
     /**
@@ -45,9 +47,12 @@ class CategoriesController extends Controller
         $request->merge([
             'slug' =>  Str::slug($request->post('name'))
         ]);
+        $data = $request->except('image');
+        $data['image'] = $this->uploadImage($request);
+        //Mass assignment
+        $category = Category::create($data);
 
-        $category = Category::create($request->all());
-
+        //PRG
         return Redirect::route('dashboard.categories.index')
             ->with('success', 'Category created!');
     }
@@ -82,14 +87,14 @@ class CategoriesController extends Controller
         // SELECT * FROM categoires WHERE id <> id
         // AND (parent_id IS NULL OR  parent_id <> $id)
 
-        $parents = Category::where('id', '<>', $id)
+        $parents = Category::where('id', '!=', $id)
 
-        ->where(function($query) use($id) {
+            ->where(function ($query) use ($id) {
 
-          $query->whereNull('parent_id')
-                ->orwhere('parent_id', '<>', $id);
-        })
-           ->get();   
+                $query->whereNull('parent_id')
+                    ->orwhere('parent_id', '<>', $id);
+            })
+            ->get();
 
         return view('dashboard.categories.edit', compact('category', 'parents'));
     }
@@ -105,7 +110,17 @@ class CategoriesController extends Controller
 
         $category = Category::findOrFail($id);
 
-        $category->update($request->all());
+        $old_image = $category->image;
+
+        $data = $request->except('image');
+        $data['image'] = $this->uploadImage($request);
+
+
+        $category->update($data);
+
+        if ($old_image && ($data['image'])) {
+            Storage::disk('public')->delete($old_image);
+        }
 
         return Redirect::route('dashboard.categories.index')
             ->with('success', 'Category updated!');
@@ -119,14 +134,33 @@ class CategoriesController extends Controller
      */
     public function destroy($id)
     {
-        /*  $category = Category::findOrFail($id);
-        $category->delete($id); */
+        $category = Category::findOrFail($id);
+        $category->delete();
+
+        if ($category->image) {
+            Storage::disk('public')->delete($category->image);
+        }
 
         // Category::where('id','=','id')->delete();
 
-        Category::destroy($id);
+        //   Category::destroy($id);
+        //   هاي ما بتزبط لو بدي احذف قسم معين ويحذفلي الصورة معاه عشان ما بتعطيني وين الصورة موجودة
 
         return Redirect::route('dashboard.categories.index')
             ->with('success', 'Category deleted');
+    }
+
+    protected function uploadImage(Request $request)
+    {
+        if (!$request->hasFile('image')) {
+            return;
+        }
+        $file = $request->file('image');
+
+        $path =  $file->store('uploads', [
+            'disk' => 'public'
+        ]);
+
+        return $path;
     }
 }
