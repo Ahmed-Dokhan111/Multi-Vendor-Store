@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Dimensions;
 
 class CategoriesController extends Controller
 {
@@ -44,6 +46,11 @@ class CategoriesController extends Controller
      */
     public function store(Request $request)
     {
+        $clean_data =  $request->validate(Category::rules(), [
+            'name.required' => 'This field (:attribute) is required',
+            'name.unique' => 'This name is already exists!'
+        ]);
+
         $request->merge([
             'slug' =>  Str::slug($request->post('name'))
         ]);
@@ -84,7 +91,7 @@ class CategoriesController extends Controller
                 ->with('info', 'Record not found!');
         }
 
-        // SELECT * FROM categoires WHERE id <> id
+        // SELECT * FROM categories WHERE id <> id
         // AND (parent_id IS NULL OR  parent_id <> $id)
 
         $parents = Category::where('id', '!=', $id)
@@ -105,20 +112,25 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
+        //  انا هنا بلزمنيش اعمل جملة الفالديشن لاني استخدمت الفالديشن الي عملته **مش زي الستور بختلف وهنا الفرق
+
+        //  $request->validate(Category::rules($id));
 
         $category = Category::findOrFail($id);
 
         $old_image = $category->image;
 
         $data = $request->except('image');
-        $data['image'] = $this->uploadImage($request);
-
+        $new_image = $this->uploadImage($request);
+        if ($new_image) {
+            $data['image'] = $new_image;
+        }
 
         $category->update($data);
 
-        if ($old_image && ($data['image'])) {
+        if ($old_image && $new_image) {
             Storage::disk('public')->delete($old_image);
         }
 
