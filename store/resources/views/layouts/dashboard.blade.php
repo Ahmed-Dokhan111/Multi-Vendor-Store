@@ -188,11 +188,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         </div>
                         <div class="info">
                             <a href="#" class="d-block">{{ Auth::user()->name }}</a>
-                          <form action="{{ route('logout') }}" method="post">
-                            @csrf
-                          <button type="submit" class="btn btn-sm btn-outline-primary">Logout</button>
+                            <form action="{{ route('logout') }}" method="post">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Logout</button>
 
-                        </form>
+                            </form>
                         </div>
                     </div>
                 @endauth
@@ -209,7 +209,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     </div>
                 </div>
 
-                @include('layouts.partials.nave')
+                {{--                 @include('layouts.partials.nave',['active' => 'dashboard'])
+ --}}
+               <x-nav context="side" />
             </div>
             <!-- /.sidebar -->
         </aside>
