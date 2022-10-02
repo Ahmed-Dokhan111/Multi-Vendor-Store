@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Rules\Filter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -25,6 +26,13 @@ class Category extends Model
              'max:255',
            //  'unique:categories,name,$id',
               Rule::unique('categories','name')->ignore($id),
+             /*  function($attribute,$value,$fails){
+                if (strtolower($value) == 'laravel'){
+                    $fails('This name is forbidden!'); //كلوجر فانكشن    الطريقة الاولى
+                }
+              }, */
+             'filter:php,laravel,html',// الطريقة ال3
+           //   new Filter(['php','html','laravel']),//الطريقة الثانية بنعمل هنا كلاس 
             ],
             'parent_id' => [
                 'nullable', 'int', 'exists:categories,id',
