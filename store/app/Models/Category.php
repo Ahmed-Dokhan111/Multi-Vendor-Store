@@ -32,7 +32,7 @@ class Category extends Model
                 }
               }, */
              'filter:php,laravel,html',// الطريقة ال3
-           //   new Filter(['php','html','laravel']),//الطريقة الثانية بنعمل هنا كلاس 
+           //   new Filter(['php','html','laravel']),//الطريقة الثانية بنعمل هنا كلاس
             ],
             'parent_id' => [
                 'nullable', 'int', 'exists:categories,id',
