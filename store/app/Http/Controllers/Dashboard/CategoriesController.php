@@ -25,7 +25,7 @@ class CategoriesController extends Controller
 
         // SELECT a.*, b.name as parent_name
         // FROM categories as a
-        // LEFT JOIN categories as b ON a.parent_id = b.id
+        // LEFT JOIN categories as b ON b.id = a.parent_id
 
         $categories = Category::leftJoin('categories as parents', 'parents.id', '=', 'categories.parent_id')
             ->select([
