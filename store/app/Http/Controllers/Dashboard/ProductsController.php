@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,11 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $products = Product::paginate();
-        
+        $products = Product::with(['category', 'store'])->paginate();
+        // SELECT * FROM products
+        // SELECT * FROM categories WHERE id IN (..)
+        // SELECT * FROM stores WHERE id IN (..)
+
         return view('dashboard.products.index', compact('products'));
     }
 
