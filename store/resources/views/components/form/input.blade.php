@@ -16,8 +16,4 @@
         'is-invalid' => $errors->has($name)
     ]) }}
 >
-@error($name)
-<div class="invalid-feedback">
-    {{ $message }}
-</div>
-@enderror
+<x-form.validation-feedback :name="$name" />
